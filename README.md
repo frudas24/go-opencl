@@ -20,3 +20,23 @@ The following improvements were added while keeping the original BSD 3-Clause li
 - Added a compatibility header `opencl_compat/CL/cl_kernel.h` for runtimes (e.g. NVIDIA NVVM) that expect legacy includes.
 
 These changes aim to make the Go OpenCL binding safer and more convenient for any downstream project. Feel free to use or adapt them in your own forks; just keep the BSD license and attribution (see `LICENSE`).
+
+### Quick usage
+
+```bash
+go get github.com/frudas24/go-opencl@v0.1.2
+```
+
+Then import the package from your Go code:
+
+```go
+import "github.com/frudas24/go-opencl/cl"
+```
+
+If you are vendoring the sources manually (for example inside `third_party/go-opencl`), you can add a `replace` directive in your project `go.mod`:
+
+```go
+replace github.com/frudas24/go-opencl => ./third_party/go-opencl
+```
+
+Both workflows are supported; pick the one that best suits your build pipeline.
