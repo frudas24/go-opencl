@@ -128,10 +128,16 @@ func (ctx *Context) CreateEmptyBuffer(flags MemFlag, size int) (*MemObject, erro
 }
 
 func (ctx *Context) CreateBuffer(flags MemFlag, data []byte) (*MemObject, error) {
+	if len(data) == 0 {
+		return ctx.CreateBufferUnsafe(flags, 0, nil)
+	}
 	return ctx.CreateBufferUnsafe(flags, len(data), unsafe.Pointer(&data[0]))
 }
 
 func (ctx *Context) CreateBufferFloat32(flags MemFlag, data []float32) (*MemObject, error) {
+	if len(data) == 0 {
+		return ctx.CreateBufferUnsafe(flags, 0, nil)
+	}
 	return ctx.CreateBufferUnsafe(flags, len(data)*4, unsafe.Pointer(&data[0]))
 }
 

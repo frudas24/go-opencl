@@ -1,3 +1,4 @@
+//go:build !cl10
 // +build !cl10
 
 package cl
@@ -13,7 +14,7 @@ func (ctx *Context) CreateImage(flags MemFlag, imageFormat ImageFormat, imageDes
 	format := imageFormat.toCl()
 	desc := imageDesc.toCl()
 	var dataPtr unsafe.Pointer
-	if data != nil {
+	if len(data) > 0 {
 		dataPtr = unsafe.Pointer(&data[0])
 	}
 	var err C.cl_int

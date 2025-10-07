@@ -1,3 +1,4 @@
+//go:build !cl10
 // +build !cl10
 
 package cl
@@ -60,11 +61,8 @@ func (d ImageDescription) toCl() C.cl_image_desc {
 	desc.num_mip_levels = C.cl_uint(d.NumMipLevels)
 	desc.num_samples = C.cl_uint(d.NumSamples)
 
-	// TODO union type on intel
-	// desc.buffer = nil
 	if d.Buffer != nil {
-		// desc.buffer = d.Buffer.clMem
-		panic("unimplemented use of cl_image_desc buffer")
+		desc.buffer = d.Buffer.clMem
 	}
 	return desc
 }

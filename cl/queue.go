@@ -38,7 +38,7 @@ func (q *CommandQueue) Finish() error {
 
 // Flush issues all previously queued OpenCL commands in a command-queue to the device associated with the command-queue.
 func (q *CommandQueue) Flush() error {
-	return toError(C.clFinish(q.clQueue))
+	return toError(C.clFlush(q.clQueue))
 }
 
 // EnqueueMapBuffer enqueues a command to map a region of the buffer object given by buffer into the host address space and returns a pointer to this mapped region.
@@ -99,8 +99,12 @@ func (q *CommandQueue) EnqueueWriteBuffer(buffer *MemObject, blocking bool, offs
 }
 
 func (q *CommandQueue) EnqueueWriteBufferFloat32(buffer *MemObject, blocking bool, offset int, data []float32, eventWaitList []*Event) (*Event, error) {
-	dataPtr := unsafe.Pointer(&data[0])
-	dataSize := int(unsafe.Sizeof(data[0])) * len(data)
+	var dataPtr unsafe.Pointer
+	var dataSize int
+	if len(data) > 0 {
+		dataPtr = unsafe.Pointer(&data[0])
+		dataSize = int(unsafe.Sizeof(data[0])) * len(data)
+	}
 	return q.EnqueueWriteBuffer(buffer, blocking, offset, dataSize, dataPtr, eventWaitList)
 }
 
@@ -112,8 +116,12 @@ func (q *CommandQueue) EnqueueReadBuffer(buffer *MemObject, blocking bool, offse
 }
 
 func (q *CommandQueue) EnqueueReadBufferFloat32(buffer *MemObject, blocking bool, offset int, data []float32, eventWaitList []*Event) (*Event, error) {
-	dataPtr := unsafe.Pointer(&data[0])
-	dataSize := int(unsafe.Sizeof(data[0])) * len(data)
+	var dataPtr unsafe.Pointer
+	var dataSize int
+	if len(data) > 0 {
+		dataPtr = unsafe.Pointer(&data[0])
+		dataSize = int(unsafe.Sizeof(data[0])) * len(data)
+	}
 	return q.EnqueueReadBuffer(buffer, blocking, offset, dataSize, dataPtr, eventWaitList)
 }
 
@@ -157,7 +165,11 @@ func (q *CommandQueue) EnqueueReadImage(image *MemObject, blocking bool, origin,
 	cOrigin := sizeT3(origin)
 	cRegion := sizeT3(region)
 	var event C.cl_event
-	err := toError(C.clEnqueueReadImage(q.clQueue, image.clMem, clBool(blocking), &cOrigin[0], &cRegion[0], C.size_t(rowPitch), C.size_t(slicePitch), unsafe.Pointer(&data[0]), C.cl_uint(len(eventWaitList)), eventListPtr(eventWaitList), &event))
+	var dataPtr unsafe.Pointer
+	if len(data) > 0 {
+		dataPtr = unsafe.Pointer(&data[0])
+	}
+	err := toError(C.clEnqueueReadImage(q.clQueue, image.clMem, clBool(blocking), &cOrigin[0], &cRegion[0], C.size_t(rowPitch), C.size_t(slicePitch), dataPtr, C.cl_uint(len(eventWaitList)), eventListPtr(eventWaitList), &event))
 	return newEvent(event), err
 }
 
@@ -166,7 +178,11 @@ func (q *CommandQueue) EnqueueWriteImage(image *MemObject, blocking bool, origin
 	cOrigin := sizeT3(origin)
 	cRegion := sizeT3(region)
 	var event C.cl_event
-	err := toError(C.clEnqueueWriteImage(q.clQueue, image.clMem, clBool(blocking), &cOrigin[0], &cRegion[0], C.size_t(rowPitch), C.size_t(slicePitch), unsafe.Pointer(&data[0]), C.cl_uint(len(eventWaitList)), eventListPtr(eventWaitList), &event))
+	var dataPtr unsafe.Pointer
+	if len(data) > 0 {
+		dataPtr = unsafe.Pointer(&data[0])
+	}
+	err := toError(C.clEnqueueWriteImage(q.clQueue, image.clMem, clBool(blocking), &cOrigin[0], &cRegion[0], C.size_t(rowPitch), C.size_t(slicePitch), dataPtr, C.cl_uint(len(eventWaitList)), eventListPtr(eventWaitList), &event))
 	return newEvent(event), err
 }
 

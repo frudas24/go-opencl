@@ -2,6 +2,8 @@ package cl
 
 import (
 	"math/rand"
+	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -122,7 +124,18 @@ func TestHello(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateProgramWithSource failed: %+v", err)
 	}
-	if err := program.BuildProgram(nil, ""); err != nil {
+	includeDir, err := filepath.Abs(filepath.Join("..", "opencl_compat", "CL"))
+	if err != nil {
+		t.Fatalf("resolve OpenCL compat include: %+v", err)
+	}
+	opts := []string{"-I" + includeDir}
+	vendor := strings.ToLower(strings.TrimSpace(device.Vendor()))
+	clStd := "CL1.2"
+	if strings.Contains(vendor, "intel") || strings.Contains(vendor, "advanced micro devices") || strings.Contains(vendor, "amd") {
+		clStd = "CL3.0"
+	}
+	opts = append(opts, "-cl-std="+clStd)
+	if err := program.BuildProgram(nil, strings.Join(opts, " ")); err != nil {
 		t.Fatalf("BuildProgram failed: %+v", err)
 	}
 	kernel, err := program.CreateKernel("square")
@@ -144,7 +157,7 @@ func TestHello(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateBuffer failed for input: %+v", err)
 	}
-	output, err := context.CreateEmptyBuffer(MemReadOnly, 4*len(data))
+	output, err := context.CreateEmptyBuffer(MemWriteOnly, 4*len(data))
 	if err != nil {
 		t.Fatalf("CreateBuffer failed for output: %+v", err)
 	}

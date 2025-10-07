@@ -16,6 +16,7 @@ in the Go standard packages.
 */
 package cl
 
+// #cgo linux CFLAGS: -DCL_TARGET_OPENCL_VERSION=120
 // #cgo linux pkg-config: OpenCL
 // #cgo darwin LDFLAGS: -framework OpenCL
 // #cgo windows LDFLAGS: -lOpenCL

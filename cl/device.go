@@ -4,6 +4,7 @@ package cl
 import "C"
 
 import (
+	"fmt"
 	"strings"
 	"unsafe"
 )
@@ -212,6 +213,34 @@ func (d *Device) Extensions() string {
 
 func (d *Device) OpenCLCVersion() string {
 	return d.mustGetInfoString(C.CL_DEVICE_OPENCL_C_VERSION)
+}
+
+func parseOpenCLCVersionString(s string) (int, int, bool) {
+	s = strings.TrimSpace(s)
+	var major, minor int
+	if _, err := fmt.Sscanf(s, "OpenCL C %d.%d", &major, &minor); err == nil {
+		return major, minor, true
+	}
+	if _, err := fmt.Sscanf(s, "%d.%d", &major, &minor); err == nil {
+		return major, minor, true
+	}
+	return 0, 0, false
+}
+
+// OpenCLCMajorMinor returns the parsed OpenCL C version reported by the device (major, minor).
+// It returns (0,0) if the version could not be parsed.
+func (d *Device) OpenCLCMajorMinor() (int, int) {
+	if d == nil {
+		return 0, 0
+	}
+	version, err := d.GetInfoString(C.CL_DEVICE_OPENCL_C_VERSION)
+	if err != nil {
+		return 0, 0
+	}
+	if major, minor, ok := parseOpenCLCVersionString(version); ok {
+		return major, minor
+	}
+	return 0, 0
 }
 
 func (d *Device) Profile() string {
