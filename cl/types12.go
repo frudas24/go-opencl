@@ -4,6 +4,15 @@
 package cl
 
 // #include "cl.h"
+// #ifndef CL_UNORM_INT24
+// #define CL_UNORM_INT24 0x10DF
+// #endif
+// #ifndef CL_DEPTH
+// #define CL_DEPTH 0x10BD
+// #endif
+// #ifndef CL_DEPTH_STENCIL
+// #define CL_DEPTH_STENCIL 0x10BE
+// #endif
 import "C"
 
 const (
